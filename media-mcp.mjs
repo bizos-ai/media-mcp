@@ -13,10 +13,12 @@ import { randomUUID } from 'node:crypto';
 // ---------------------------------------------------------------------------
 // Config from environment
 // ---------------------------------------------------------------------------
-const PROXY_URL   = (process.env.MCP_PROXY_URL   || 'http://127.0.0.1:3000').replace(/\/$/, '');
+// 默认全部指向 token hub（https://www.h2-bottle.com）；同事 clone 后只需提供自己的 MCP_API_KEY 即可
+const PROXY_URL   = (process.env.MCP_PROXY_URL   || 'https://www.h2-bottle.com').replace(/\/$/, '');
 const API_KEY     = process.env.MCP_API_KEY       || '';
 const PUBLIC_BASE = (process.env.MCP_PUBLIC_BASE  || 'https://www.h2-bottle.com').replace(/\/$/, '');
-const GEN_DIR     = process.env.MCP_GEN_DIR       || path.join(process.env.HOME, 'api-token-hub', 'public', 'gen');
+// 语音 MP3 的本地落盘目录（远程调用时返回本地文件路径）
+const GEN_DIR     = process.env.MCP_GEN_DIR       || path.join(process.env.HOME || '.', 'media-mcp-output');
 
 // ---------------------------------------------------------------------------
 // Tool definitions (JSON Schema)
@@ -36,7 +38,7 @@ const TOOLS = [
   },
   {
     name: 'text_to_speech',
-    description: '将文本转换为 MP3 语音文件，返回可访问的公网 URL。',
+    description: '将文本转换为 MP3 语音文件，保存到本地并返回文件路径（与 hub 同机部署时可返回公网 URL）。',
     inputSchema: {
       type: 'object',
       properties: {
@@ -173,7 +175,11 @@ async function handleTextToSpeech(args) {
   const filepath  = path.join(GEN_DIR, filename);
   fs.writeFileSync(filepath, Buffer.from(buffer));
 
-  return `语音已生成：${PUBLIC_BASE}/gen/${filename}`;
+  // 远程调用时文件在本机，返回本地路径；若与 hub 同机部署且配了 MCP_PUBLIC_BASE/MCP_GEN_DIR 指向 public/gen，可改用 URL
+  if (process.env.MCP_GEN_DIR && process.env.MCP_PUBLIC_BASE) {
+    return `语音已生成：${PUBLIC_BASE}/gen/${filename}`;
+  }
+  return `语音已生成(本地文件)：${filepath}`;
 }
 
 async function handleGenerateVideo(args) {

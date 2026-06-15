@@ -39,16 +39,13 @@ git clone https://github.com/bizos-ai/media-mcp.git
 cd media-mcp
 ```
 
-注册到 Claude Code（把环境变量换成你的）：
+注册到 Claude Code。**默认已指向 token hub（`https://www.h2-bottle.com`），只需提供你自己的 Key**：
 
 ```bash
-claude mcp add media node /绝对路径/media-mcp/media-mcp.mjs \
-  -e MCP_PROXY_URL=https://www.h2-bottle.com \
-  -e MCP_API_KEY=<你的子key> \
-  -e MCP_PUBLIC_BASE=https://www.h2-bottle.com
+claude mcp add media node /绝对路径/media-mcp/media-mcp.mjs -e MCP_API_KEY=<你的子key>
 ```
 
-重启 Claude Code 后即可在对话里使用四个工具。
+重启 Claude Code 后即可在对话里使用四个工具。自托管别的代理时，再用 `-e MCP_PROXY_URL=...` 覆盖默认地址即可。
 
 ---
 
@@ -56,12 +53,12 @@ claude mcp add media node /绝对路径/media-mcp/media-mcp.mjs \
 
 | 变量 | 默认值 | 说明 |
 |------|--------|------|
-| `MCP_PROXY_URL` | `http://127.0.0.1:3000` | 媒体代理的基地址（OpenAI 兼容）。工具会请求它的 `/v1/images/generations`、`/v1/audio/speech`、`/v1/minimax/video_generation` 等 |
-| `MCP_API_KEY` | *(空)* | 调用代理用的 Bearer Key（你的子 Key） |
-| `MCP_PUBLIC_BASE` | `https://www.h2-bottle.com` | 语音文件落盘后对外可访问的基地址 |
-| `MCP_GEN_DIR` | `$HOME/api-token-hub/public/gen` | 语音 MP3 的落盘目录（仅与代理同机部署时需要） |
+| `MCP_PROXY_URL` | `https://www.h2-bottle.com` | 媒体代理的基地址（OpenAI 兼容）。默认指向 token hub；自托管时覆盖 |
+| `MCP_API_KEY` | *(空)* | 调用代理用的 Bearer Key（你的子 Key）。**唯一必填项** |
+| `MCP_PUBLIC_BASE` | `https://www.h2-bottle.com` | 仅当与代理同机部署、想让语音返回公网 URL 时配合 `MCP_GEN_DIR` 使用 |
+| `MCP_GEN_DIR` | `$HOME/media-mcp-output` | 语音 MP3 的本地落盘目录 |
 
-> 说明：`text_to_speech` 会把 MP3 写到 `MCP_GEN_DIR` 再返回 `MCP_PUBLIC_BASE/gen/<file>` 链接，因此该工具最适合与代理**同机**运行；`generate_image` / `generate_video` / `digital_human_video` 直接返回上游 URL，远程运行也可用。
+> 说明：远程调用时，`text_to_speech` 把 MP3 存到本机 `MCP_GEN_DIR` 并返回**本地文件路径**；`generate_image` / `generate_video` / `digital_human_video` 直接返回上游 URL，远程随处可用。仅当你把 MCP 跑在代理同机、且同时设置了 `MCP_GEN_DIR`（指向 `public/gen`）和 `MCP_PUBLIC_BASE` 时，语音才会返回公网 URL。
 
 ---
 
