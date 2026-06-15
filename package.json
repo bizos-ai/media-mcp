@@ -1,0 +1,24 @@
+{
+  "name": "media-mcp",
+  "version": "1.0.0",
+  "description": "MCP server exposing image / text-to-speech / video / digital-human generation tools backed by an OpenAI-compatible media proxy.",
+  "type": "module",
+  "bin": {
+    "media-mcp": "./media-mcp.mjs"
+  },
+  "files": [
+    "media-mcp.mjs"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "claude",
+    "image-generation",
+    "text-to-speech",
+    "video-generation"
+  ],
+  "license": "MIT"
+}
